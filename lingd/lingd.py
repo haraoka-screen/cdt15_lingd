@@ -1,11 +1,11 @@
-import numpy as np
-from sklearn.utils import check_scalar, check_array
-from sklearn.decomposition import FastICA
-
 import os
 import shutil
 import subprocess
 import tempfile
+
+import numpy as np
+from sklearn.utils import check_scalar, check_array
+from sklearn.decomposition import FastICA
 
 
 class LiNGD:
@@ -20,7 +20,7 @@ class LiNGD:
     """
 
     def __init__(self, k=5):
-        """ Construct a LiNG-D model.
+        """Construct a LiNG-D model.
 
         Parameters
         ----------
@@ -33,7 +33,7 @@ class LiNGD:
         self._fitted = False
 
     def fit(self, X):
-        """ Fit the model to X.
+        """Fit the model to X.
 
         Parameters
         ----------
@@ -55,7 +55,7 @@ class LiNGD:
         permutes, costs = self._run_murty(1 / np.abs(W_ica), k=self._k)
         costs = np.array(costs)
 
-        estimated_Bs = []
+        B_estimates = []
         for i, p in enumerate(permutes):
             PW_ica = np.zeros_like(W_ica)
             PW_ica[p] = W_ica
@@ -65,17 +65,17 @@ class LiNGD:
             W_estimate = PW_ica / D
             B_estimate = np.eye(len(W_estimate)) - W_estimate
 
-            estimated_Bs.append(B_estimate)
-        estimated_Bs = np.array(estimated_Bs)
+            B_estimates.append(B_estimate)
+        B_estimates = np.array(B_estimates)
 
         is_stables = []
-        for B in estimated_Bs:
+        for B in B_estimates:
             values, _ = np.linalg.eig(B)
             is_stables.append(all(abs(values) < 1))
         is_stables = np.array(is_stables)
 
         self._X = X
-        self._adjacency_matrices = estimated_Bs
+        self._adjacency_matrices = B_estimates
         self._costs = costs
         self._is_stables = is_stables
         self._fitted = True
@@ -155,7 +155,7 @@ class LiNGD:
                     msg = ret.stderr.decode()
                 raise RuntimeError(msg)
 
-            # retrieve result
+            # retrieve results
             permutes = []
 
             for f in os.listdir(temp_dir):
