@@ -17,22 +17,20 @@ from lingd import LiNGD
 model = LiNGD()
 model.fit(X)
 
-# estimated adjacency matrices
+# estimated results
 print(model.adjacency_matrices_)
 
-# cost of each matrices
 print(model.costs_)
 
-# stability of each matrices
 print(model.is_stables_)
 
-# bound of causal effects
+# bounds of causal effects
 print(model.bound_of_causal_effect(1))
 ```
 
 ## Example
 
-[lingd/examples](./examples)
+[lingd/examples/lingd.ipynb](./examples/lingd.ipynb)
 
 ## References
 
