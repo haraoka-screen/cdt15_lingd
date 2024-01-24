@@ -85,7 +85,7 @@ class LiNGD:
 
         return self
 
-    def estimates_causal_effects(self, target_index):
+    def estimate_causal_effects(self, target_index):
         """
         This method estimates causal effects from target_index to each feature.
 
