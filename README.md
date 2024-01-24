@@ -24,8 +24,8 @@ print(model.costs_)
 
 print(model.is_stables_)
 
-# bounds of causal effects
-print(model.bound_of_causal_effect(1))
+# effects of causal effects
+print(model.estimates_causal_effects(1))
 ```
 
 ## Example

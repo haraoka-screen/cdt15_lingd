@@ -85,9 +85,9 @@ class LiNGD:
 
         return self
 
-    def bound_of_causal_effect(self, target_index):
+    def estimates_causal_effects(self, target_index):
         """
-        This method calculates the causal effect from target_index to each feature
+        This method estimates causal effects from target_index to each feature.
 
         Parameters
         ----------
