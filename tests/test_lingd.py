@@ -109,7 +109,7 @@ def test_properties_exception(init):
     model = LiNGD()
 
     try:
-        model.bound_of_causal_effect(0)
+        model.estimates_causal_effects(0)
     except RuntimeError:
         pass
     else:
@@ -136,7 +136,7 @@ def test_properties_exception(init):
     else:
         raise AssertionError
 
-def test_bound_of_causal_effect_success(init, test_data):
+def test_estimates_causal_effects_success(init, test_data):
     init()
 
     X = test_data
@@ -144,14 +144,14 @@ def test_bound_of_causal_effect_success(init, test_data):
     k = 10
     model = LiNGD(k=k)
     model.fit(X)
-    bounds = model.bound_of_causal_effect(1)
+    effects = model.estimates_causal_effects(1)
 
-    assert len(bounds) == k
+    assert len(effects) == k
 
-    for bound in bounds:
-       assert len(bound) == X.shape[1]
+    for effect in effects:
+       assert len(effect) == X.shape[1]
 
-def test_bound_of_causal_effect_exception(init, test_data):
+def test_estimates_causal_effects_exception(init, test_data):
     init()
 
     X = test_data
@@ -160,7 +160,7 @@ def test_bound_of_causal_effect_exception(init, test_data):
     model.fit(X)
 
     try:
-        bounds = model.bound_of_causal_effect(-1)
+        effects = model.estimates_causal_effects(-1)
     except ValueError:
         pass
     else:
