@@ -1,9 +1,11 @@
 import numpy as np
 
 from lingam import VARLiNGAM
+from lingam import VARBootstrapResult
 from sklearn.utils import check_array
 from sklearn.utils import check_scalar
 from sklearn.utils import check_random_state
+from sklearn.utils import resample
 
 from .lingd import LiNGD
 
@@ -97,6 +99,71 @@ class CyclicVARLiNGAM(VARLiNGAM):
         self._costs = model.costs_
 
         return self
+
+    def bootstrap(self, X, n_sampling):
+        """Evaluate the statistical reliability of DAG based on the bootstrapping.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            Training data, where ``n_samples`` is the number of samples
+            and ``n_features`` is the number of features.
+        n_sampling : int
+            Number of bootstrapping samples.
+
+        Returns
+        -------
+        result : TimeseriesBootstrapResult
+            Returns the result of bootstrapping.
+        """
+        X = check_array(X)
+
+        n_samples = X.shape[0]
+        n_features = X.shape[1]
+
+        # store initial settings
+        ar_coefs = self._ar_coefs
+        lags = self._lags
+
+        criterion = self._criterion
+        self._criterion = None
+
+        self.fit(X)
+
+        fitted_ar_coefs = self._ar_coefs
+
+        # XXX: can't calculate total_effect because of not having causal_order
+        total_effects = np.zeros(
+            [n_sampling, n_features, n_features * (1 + self._lags)]
+        )
+
+        adjacency_matrices = []
+        for i in range(n_sampling):
+            sampled_residuals = resample(self._residuals, n_samples=n_samples)
+
+            resampled_X = np.zeros((n_samples, n_features))
+            for j in range(n_samples):
+                if j < lags:
+                    resampled_X[j, :] = sampled_residuals[j]
+                    continue
+
+                ar = np.zeros((1, n_features))
+                for t, M in enumerate(fitted_ar_coefs):
+                    ar += np.dot(M, resampled_X[j - t - 1, :].T).T
+
+                resampled_X[j, :] = ar + sampled_residuals[j]
+
+            # restore initial settings
+            self._ar_coefs = ar_coefs
+            self._lags = lags
+
+            self.fit(resampled_X)
+            am = np.concatenate([*self._adjacency_matrices], axis=1)
+            adjacency_matrices.append(am)
+
+        self._criterion = criterion
+
+        return VARBootstrapResult(adjacency_matrices, total_effects)
     
     @property
     def adjacency_matrices_list_(self):
