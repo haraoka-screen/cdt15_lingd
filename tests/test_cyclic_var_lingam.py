@@ -38,11 +38,11 @@ def _make_tau_coefs(tau_len, n_features=8):
         coefs.append(coef)
     return coefs
 
-def _generate_var_graph(n_features=4, n_lags=1, is_shuffle=True):
-    B = np.empty((n_lags + 1, n_features, n_features))
+def _generate_var_graph(n_features=4, lags=1, is_shuffle=True):
+    B = np.empty((lags + 1, n_features, n_features))
     
     B[0] = _make_dag(n_features=n_features)
-    B[1:] = _make_tau_coefs(n_lags, n_features=n_features)
+    B[1:] = _make_tau_coefs(lags, n_features=n_features)
     
     if is_shuffle:
         indices = np.random.permutation(n_features)
@@ -66,7 +66,7 @@ def _make_var_data(B, T=100):
         if len(lag_data) == 0:
             lag_data = 0
         else:
-            lag_data = np.hstack(B[1:]) @ np.vstack(lag_data[::-1].T) 
+            lag_data = np.hstack(B[1:lag + 1]) @ np.hstack([*lag_data[::-1]]).reshape(-1, 1)
 
         e = np.random.uniform(size=(n_features, 1))
         X[t] = (I_minus_B0_inv @ (lag_data + e)).T
@@ -113,7 +113,7 @@ def _make_cycle_path(B, max_trial=10):
 def test_data():
     np.random.seed(0)
 
-    B = _generate_var_graph()
+    B = _generate_var_graph(lags=2)
     B = _make_cycle_path(B)
     X = _make_var_data(B, T=1000)
 
@@ -124,7 +124,7 @@ def test_fit_success(init, test_data):
 
     X, B = test_data
 
-    lags = 1
+    lags = 2 
     k = 5
     n_features = X.shape[1]
     n_bootstraps = 4
