@@ -9,6 +9,7 @@ from .lingd import LiNGD
 
 
 class CyclicVARLiNGAM(VARLiNGAM):
+    """ Implementation of VAR-LiNGAM algorithm for cyclic structured data """
     
     def __init__(self, lags=1, criterion="bic", ar_coefs=None, k=5, random_state=None):
         """Construct a CyclicVARLiNGAM model.
@@ -62,6 +63,8 @@ class CyclicVARLiNGAM(VARLiNGAM):
 
         random_state = check_random_state(self._random_state)
 
+        # XXX: using updated ar_coefs causes bugs
+        #self._ar_coefs = None
         M_taus = self._ar_coefs
 
         if M_taus is None:
