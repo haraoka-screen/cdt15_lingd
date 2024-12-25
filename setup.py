@@ -16,6 +16,7 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'scikit-learn',
+        'lingam',
     ],
     url='https://github.com/cdt15/lingd',
     packages=setuptools.find_packages(exclude=['tests', 'examples']),
